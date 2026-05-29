@@ -1,0 +1,17 @@
+# Local secrets for `astro dev` / wrangler. Copy to `.dev.vars` and fill in.
+# In production these are set via `wrangler secret put <NAME>` (never committed).
+
+# OpenAI — powers feature extraction + report generation.
+OPEN_AI_API_KEY=sk-...
+
+# Resend — emails the finished report to the visitor.
+RESEND_API_KEY=re_...
+
+# Optimization Doc's OWN Kit account — used to capture the visitor's email
+# as a lead (POST /v4/subscribers). This is NOT the visitor's key; the
+# visitor's key is typed into the form, used once, and never stored.
+OP_DOC_KIT_API_KEY=kit_...
+
+# Non-secret config (also set in wrangler.jsonc vars).
+KIT_API_BASE_URL=https://api.kit.com/v4
+DEFAULT_MODEL=gpt-4o

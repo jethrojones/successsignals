@@ -1,0 +1,28 @@
+{
+  // Success Signal Analysis — Cloudflare Workers (Astro SSR via @astrojs/cloudflare).
+  // Secrets are NOT stored here. Set them with `wrangler secret put <NAME>`:
+  //   OPEN_AI_API_KEY, RESEND_API_KEY, OP_DOC_KIT_API_KEY
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "successsignals",
+  "main": "./dist/_worker.js/index.js",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    // Non-secret defaults. Override locally in .dev.vars.
+    "KIT_API_BASE_URL": "https://api.kit.com/v4",
+    "DEFAULT_MODEL": "gpt-4o"
+  },
+  "routes": [
+    {
+      "pattern": "successsignals.optimizationdoc.com",
+      "custom_domain": true
+    }
+  ]
+}

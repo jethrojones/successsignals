@@ -1,0 +1,347 @@
+/* ============================================================
+   Optimization Doc — Colors & Type
+   ------------------------------------------------------------
+   Tokens are designed around the mascot:
+     - Mad-scientist YELLOW (volt) for highlight + brand pop
+     - Lab-coat NAVY (ink) for headlines and confidence
+     - Lightning BLUE (bolt) for one-action-at-a-time interaction
+     - CREAM paper background (warm, human, not stark white)
+   ============================================================ */
+
+/* Local Archivo (variable, weight + width axes) — supplied by the user. */
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/Archivo-VariableFont_wdth,wght.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-stretch: 62.5% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/Archivo-Italic-VariableFont_wdth,wght.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-stretch: 62.5% 125%;
+  font-style: italic;
+  font-display: swap;
+}
+/* Archivo Black — dedicated static face for the heaviest display lockup. */
+@font-face {
+  font-family: "Archivo Black";
+  src: url("/fonts/ArchivoBlack-Regular.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+/* IBM Plex Sans (variable). */
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-VariableFont_wdth,wght.ttf") format("truetype-variations");
+  font-weight: 100 700;
+  font-stretch: 85% 100%;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-Italic-VariableFont_wdth,wght.ttf") format("truetype-variations");
+  font-weight: 100 700;
+  font-stretch: 85% 100%;
+  font-style: italic;
+  font-display: swap;
+}
+/* JetBrains Mono (variable). */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-Italic-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 100 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  /* -------- BRAND PALETTE -------- */
+  /* Ink — navy of the headline lockup, primary text */
+  --od-ink:        #15243D;
+  --od-ink-2:      #2B3D5C;   /* secondary text */
+  --od-ink-3:      #4F5E78;   /* tertiary / metadata */
+
+  /* Volt — mascot yellow. Brand accent. Highlight. Sparingly. */
+  --od-volt:       #F2DD55;   /* the face */
+  --od-volt-2:     #E8C72A;   /* underline / shadow */
+  --od-volt-soft:  #FBF3B8;   /* tint for backgrounds */
+
+  /* Bolt — electric blue. The single action color. */
+  --od-bolt:       #2A6FDB;
+  --od-bolt-2:     #1F58B5;   /* hover/press */
+  --od-bolt-soft:  #DDEAF8;   /* tinted bg */
+
+  /* Sky — light blue field, used for hero washes */
+  --od-sky:        #C5E0F2;
+  --od-sky-2:      #8FBED9;
+  --od-sky-soft:   #EAF3FA;
+
+  /* Paper — warm off-white. The page foundation. */
+  --od-paper:      #FAF6E9;   /* main page */
+  --od-paper-2:    #F2EBCF;   /* card alt / mascot bg */
+  --od-paper-3:    #FFFFFF;   /* pure surface for cards on top of paper */
+
+  /* Steel — neutral grays */
+  --od-steel:      #6B7585;
+  --od-steel-2:    #A9B1BD;
+  --od-steel-3:    #D6DAE0;
+  --od-steel-4:    #ECEEF1;
+
+  /* Semantic */
+  --od-ok:         #2F8F5E;
+  --od-warn:       #D17A2B;
+  --od-danger:     #C4452C;
+
+  /* -------- SEMANTIC ALIASES -------- */
+  --fg-1:          var(--od-ink);
+  --fg-2:          var(--od-ink-2);
+  --fg-3:          var(--od-ink-3);
+  --fg-muted:      var(--od-steel);
+  --fg-on-ink:     var(--od-paper);
+  --fg-on-bolt:    #ffffff;
+  --fg-on-volt:    var(--od-ink);
+
+  --bg-page:       var(--od-paper);
+  --bg-surface:    var(--od-paper-3);
+  --bg-elevated:   #ffffff;
+  --bg-tint:       var(--od-paper-2);
+  --bg-ink:        var(--od-ink);
+  --bg-sky:        var(--od-sky);
+
+  --border-1:      #E2DAB9;   /* warm border on paper */
+  --border-2:      #CFC59E;   /* stronger warm border */
+  --border-cool:   var(--od-steel-3);
+  --border-strong: var(--od-ink);
+
+  --action:        var(--od-bolt);
+  --action-hover:  var(--od-bolt-2);
+  --highlight:     var(--od-volt);
+
+  /* -------- TYPE FAMILIES -------- */
+  --font-display:  "Archivo Black", "Archivo", system-ui, sans-serif; /* dedicated black face for display lockup */
+  --font-heading:  "Archivo", system-ui, sans-serif; /* variable — 700/800 for headings */
+  --font-body:     "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono:     "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* -------- TYPE SCALE -------- */
+  --size-display:  clamp(56px, 7vw, 96px);
+  --size-h1:       clamp(40px, 5vw, 64px);
+  --size-h2:       32px;
+  --size-h3:       22px;
+  --size-h4:       18px;
+  --size-body:     16px;
+  --size-body-lg:  18px;
+  --size-small:    14px;
+  --size-caption:  12px;
+  --size-eyebrow:  12px;
+
+  /* -------- LINE HEIGHT / TRACKING -------- */
+  --lh-tight:      1.02;
+  --lh-snug:       1.15;
+  --lh-normal:     1.5;
+  --lh-loose:      1.65;
+
+  --track-display: -0.02em;
+  --track-h1:      -0.02em;
+  --track-h2:      -0.015em;
+  --track-eyebrow: 0.16em;
+
+  /* -------- RADII -------- */
+  --radius-xs:     2px;
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     20px;
+  --radius-pill:   999px;
+
+  /* -------- SHADOWS -------- */
+  /* Hard, slightly offset — the visual language uses a "stamped print" feel.
+     We do NOT use diffuse blurry drop shadows. */
+  --shadow-stamp-sm: 2px 2px 0 var(--od-ink);
+  --shadow-stamp:    4px 4px 0 var(--od-ink);
+  --shadow-stamp-lg: 6px 6px 0 var(--od-ink);
+  --shadow-stamp-volt: 4px 4px 0 var(--od-volt-2);
+
+  /* Soft elevation, used minimally on light surfaces */
+  --shadow-soft-sm:  0 1px 2px rgba(21,36,61,0.08);
+  --shadow-soft:     0 4px 16px rgba(21,36,61,0.10);
+  --shadow-soft-lg:  0 12px 32px rgba(21,36,61,0.14);
+
+  /* -------- SPACING (4pt grid) -------- */
+  --space-0:  0px;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* -------- BORDERS -------- */
+  --bw-hair:   1px;
+  --bw-line:   2px;
+  --bw-bold:   3px;
+
+  /* -------- MOTION -------- */
+  --ease-out:  cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in:   cubic-bezier(0.7, 0.0, 0.84, 0.0);
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:  120ms;
+  --dur-base:  200ms;
+  --dur-slow:  360ms;
+}
+
+/* ============================================================
+   SEMANTIC TYPE STYLES
+   Use these as utility classes OR copy the rule onto an element.
+   ============================================================ */
+
+.od-display,
+[data-od="display"] {
+  font-family: var(--font-display);
+  font-size: var(--size-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-display);
+  color: var(--fg-1);
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.od-h1,
+[data-od="h1"] {
+  font-family: var(--font-heading);
+  font-size: var(--size-h1);
+  font-weight: 800;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-h1);
+  color: var(--fg-1);
+}
+
+.od-h2,
+[data-od="h2"] {
+  font-family: var(--font-heading);
+  font-size: var(--size-h2);
+  font-weight: 800;
+  line-height: var(--lh-snug);
+  letter-spacing: var(--track-h2);
+  color: var(--fg-1);
+}
+
+.od-h3,
+[data-od="h3"] {
+  font-family: var(--font-heading);
+  font-size: var(--size-h3);
+  font-weight: 700;
+  line-height: var(--lh-snug);
+  color: var(--fg-1);
+}
+
+.od-h4,
+[data-od="h4"] {
+  font-family: var(--font-body);
+  font-size: var(--size-h4);
+  font-weight: 600;
+  line-height: var(--lh-snug);
+  color: var(--fg-1);
+}
+
+.od-body,
+[data-od="body"] {
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--lh-normal);
+  color: var(--fg-2);
+  font-weight: 400;
+}
+
+.od-body-lg,
+[data-od="body-lg"] {
+  font-family: var(--font-body);
+  font-size: var(--size-body-lg);
+  line-height: var(--lh-loose);
+  color: var(--fg-2);
+  font-weight: 400;
+}
+
+.od-small,
+[data-od="small"] {
+  font-family: var(--font-body);
+  font-size: var(--size-small);
+  line-height: var(--lh-normal);
+  color: var(--fg-3);
+}
+
+.od-caption,
+[data-od="caption"] {
+  font-family: var(--font-body);
+  font-size: var(--size-caption);
+  line-height: var(--lh-snug);
+  color: var(--fg-muted);
+}
+
+.od-eyebrow,
+[data-od="eyebrow"] {
+  font-family: var(--font-mono);
+  font-size: var(--size-eyebrow);
+  font-weight: 500;
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.od-mono,
+[data-od="mono"] {
+  font-family: var(--font-mono);
+  font-size: var(--size-small);
+  color: var(--fg-2);
+}
+
+/* Highlight text — yellow marker swipe. Used for ONE phrase per page. */
+.od-highlight {
+  background: linear-gradient(
+    transparent 55%,
+    var(--od-volt) 55%,
+    var(--od-volt) 92%,
+    transparent 92%
+  );
+  padding: 0 0.05em;
+}
+
+/* Link */
+.od-link {
+  color: var(--od-bolt);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.od-link:hover { color: var(--od-bolt-2); }
+
+/* ============================================================
+   PAGE DEFAULTS
+   ============================================================ */
+html, body {
+  background: var(--bg-page);
+  color: var(--fg-1);
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+}

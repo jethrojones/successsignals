@@ -3,8 +3,8 @@
 
 const RESEND_URL = "https://api.resend.com/emails";
 
-// Verified sender for optimizationdoc.com. Adjust if the domain's from-address differs.
-const FROM = "Success Signal Analysis <signals@optimizationdoc.com>";
+// Verified Resend sending domain for this app.
+const FROM = "Success Signal Analysis <signals@ss.optimizationdoc.com>";
 
 interface SendArgs {
   apiKey: string;

@@ -132,9 +132,11 @@ table.camps tr.lose td:first-child { box-shadow: inset 3px 0 0 var(--od-danger);
   display: inline-block; font-family: var(--font-mono); font-size: 11px; font-weight: 600;
   text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: var(--radius-pill);
 }
-.badge.High { background: #DCEFE4; color: var(--od-ok); }
-.badge.Medium { background: var(--od-volt-soft); color: var(--od-warn); }
-.badge.Low { background: #F6DAD2; color: var(--od-danger); }
+/* Ink text on the colored tints clears 4.5:1; the tint + label carry meaning
+   (we don't rely on color alone). A colored left bar keeps the semantic cue. */
+.badge.High { background: #DCEFE4; color: var(--fg-1); box-shadow: inset 3px 0 0 var(--od-ok); }
+.badge.Medium { background: var(--od-volt-soft); color: var(--fg-1); box-shadow: inset 3px 0 0 var(--od-warn); }
+.badge.Low { background: #F6DAD2; color: var(--fg-1); box-shadow: inset 3px 0 0 var(--od-danger); }
 
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
 @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
@@ -163,9 +165,17 @@ table.camps tr.lose td:first-child { box-shadow: inset 3px 0 0 var(--od-danger);
 .help-link {
   background: none; border: none; padding: 0; cursor: pointer;
   font-family: var(--font-body); font-size: var(--size-caption); font-weight: 600;
-  color: var(--od-bolt); text-decoration: underline; text-underline-offset: 2px;
+  /* darker bolt clears 4.5:1 on cream/tinted surfaces */
+  color: var(--od-bolt-2); text-decoration: underline; text-underline-offset: 2px;
 }
-.help-link:hover { color: var(--od-bolt-2); }
+.help-link:hover { color: var(--od-ink); }
+
+/* Visible keyboard focus for every interactive control (we reset native outlines). */
+.btn:focus-visible, .btn--ghost:focus-visible, .help-link:focus-visible,
+.modal .close:focus-visible, a:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--action); outline-offset: 2px;
+}
 
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(21, 36, 61, 0.55);
@@ -180,7 +190,7 @@ table.camps tr.lose td:first-child { box-shadow: inset 3px 0 0 var(--od-danger);
 .modal h2 { font-family: var(--font-heading); font-weight: 800; font-size: var(--size-h3); color: var(--fg-1); margin: 0 0 var(--space-4); }
 .modal ol { margin: 0 0 var(--space-4) 1.2em; padding: 0; }
 .modal li { font-family: var(--font-body); color: var(--fg-2); line-height: var(--lh-normal); margin: var(--space-3) 0; }
-.modal a { color: var(--od-bolt); font-weight: 600; }
+.modal a { color: var(--od-bolt-2); font-weight: 600; }
 .modal .close {
   position: absolute; top: var(--space-4); right: var(--space-4);
   background: none; border: none; cursor: pointer; font-size: 22px; line-height: 1;
@@ -190,5 +200,9 @@ table.camps tr.lose td:first-child { box-shadow: inset 3px 0 0 var(--od-danger);
 .modal .modal-note { font-size: var(--size-small); color: var(--fg-2); background: var(--od-bolt-soft); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); }
 
 .hidden { display: none !important; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
 .foot { margin-top: var(--space-12); font-family: var(--font-body); font-size: var(--size-caption); color: var(--fg-muted); text-align: center; }
-.foot a { color: var(--od-bolt); }
+.foot a { color: var(--od-bolt-2); }

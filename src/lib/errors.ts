@@ -70,24 +70,24 @@ export function toFriendlyError(err: unknown): FriendlyError {
         };
       default:
         return {
-          title: "Kit had trouble with that request",
+          title: "Kit couldn't complete that request",
           detail:
-            "Kit returned an unexpected response. Give it another try in a moment; if it keeps happening, your Kit plan may not expose the broadcast endpoints.",
+            "Kit responded in a way we didn't expect, so we paused rather than show you a half-finished analysis. Please try again in a moment. If it keeps happening, your Kit plan may not include access to broadcast data — your account team can confirm.",
         };
     }
   }
 
   if (err instanceof OpenAIError) {
     return {
-      title: "The analysis step hit a snag",
+      title: "We couldn't finish writing your report",
       detail:
         "We pulled your campaigns fine, but generating the written report failed. This is almost always temporary — try running the analysis again.",
     };
   }
 
   return {
-    title: "That didn't go through",
+    title: "The analysis stopped before it finished",
     detail:
-      "Something interrupted the analysis before it finished. Your Kit key wasn't stored. Please try again — if it persists, send fewer broadcasts to start.",
+      "We hit an unexpected problem partway through and couldn't complete your report. Your Kit key wasn't stored. Please try again in a moment — if it keeps happening, reach out and we'll take a look.",
   };
 }

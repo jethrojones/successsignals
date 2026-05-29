@@ -52,7 +52,7 @@ function parseInput(body: any): AnalyzeInput | null {
   const email = String(body.email ?? "").trim();
   const goal = VALID_GOALS.includes(body.goal) ? (body.goal as Goal) : "other";
   if (!kitApiKey || !email) return null;
-  const limit = Math.min(50, Math.max(1, Number(body.limit) || 20));
+  const limit = Math.min(50, Math.max(1, Math.floor(Number(body.limit)) || 20));
   return {
     kitApiKey,
     email,
@@ -168,25 +168,31 @@ export const POST: APIRoute = async ({ request, locals }) => {
         // Deliver the report first; side-effects after, never blocking the result.
         send("done", result);
 
-        const markdown = reportToMarkdown(result);
-        await Promise.allSettled([
-          env.OP_DOC_KIT_API_KEY
-            ? captureLead({
-                apiKey: env.OP_DOC_KIT_API_KEY,
-                baseUrl: baseUrl,
-                email: input.email,
-              })
-            : Promise.resolve(false),
-          env.RESEND_API_KEY
-            ? emailReport({
-                apiKey: env.RESEND_API_KEY,
-                to: input.email,
-                accountName: account.name,
-                markdown,
-                html: renderReportHtml(result),
-              })
-            : Promise.resolve(false),
-        ]);
+        // Side-effects are isolated in their own try so a failure here can never
+        // re-enter fail() and emit an error event AFTER the terminal "done".
+        try {
+          const markdown = reportToMarkdown(result);
+          await Promise.allSettled([
+            env.OP_DOC_KIT_API_KEY
+              ? captureLead({
+                  apiKey: env.OP_DOC_KIT_API_KEY,
+                  baseUrl: baseUrl,
+                  email: input.email,
+                })
+              : Promise.resolve(false),
+            env.RESEND_API_KEY
+              ? emailReport({
+                  apiKey: env.RESEND_API_KEY,
+                  to: input.email,
+                  accountName: account.name,
+                  markdown,
+                  html: renderReportHtml(result),
+                })
+              : Promise.resolve(false),
+          ]);
+        } catch {
+          // Report already delivered; swallow post-delivery side-effect errors.
+        }
 
         controller.close();
       } catch (err) {

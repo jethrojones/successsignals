@@ -22,8 +22,10 @@ export function scoreCampaign(
       // Kit doesn't expose replies; clicks are the best engagement proxy.
       return round(stats.click_rate);
     case "unsubscribes":
-      // Lower unsub rate = better. Invert onto 0–100.
-      return round(Math.max(0, 100 - stats.unsubscribe_rate * 100));
+      // Lower unsub rate = better. unsubscribe_rate is already a percentage
+      // (verified against the Kit API — e.g. 24/5122 recipients → 0.47), so we
+      // invert it directly onto 0–100, consistent with open_rate/click_rate.
+      return round(Math.max(0, 100 - stats.unsubscribe_rate));
     case "sales":
       if (revenue != null && stats.recipients > 0) {
         // Revenue per recipient, scaled. Falls back to clicks if no revenue.

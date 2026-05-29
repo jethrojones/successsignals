@@ -43,7 +43,7 @@ export const prerender = true;
         <div class="grid-2">
           <div class="field">
             <label for="goal">Primary goal</label>
-            <select id="goal" name="goal">
+            <select id="goal" name="goal" aria-controls="goalOther-wrap">
               <option value="opens">More opens</option>
               <option value="clicks" selected>More clicks</option>
               <option value="sales">More sales</option>
@@ -65,14 +65,15 @@ export const prerender = true;
           </div>
         </div>
 
-        <div class="field" id="goalOther-wrap" style="display:none;">
+        <div class="field" id="goalOther-wrap" style="display:none;" aria-live="polite">
           <label for="goalOther">Describe your goal</label>
           <input type="text" id="goalOther" name="goalOther" placeholder="e.g. more event sign-ups" />
         </div>
 
         <div class="field" style="max-width:220px;">
           <label for="limit">Broadcasts to analyze</label>
-          <input type="number" id="limit" name="limit" value="20" min="1" max="50" />
+          <input type="number" id="limit" name="limit" value="20" min="1" max="50" aria-describedby="limit-hint" />
+          <div class="hint" id="limit-hint">Between 1 and 50. Defaults to 20.</div>
         </div>
 
         <div class="field">
@@ -101,6 +102,7 @@ export const prerender = true;
         <h1 style="font-size:var(--size-h1);">Reading your campaigns.</h1>
       </div>
       <div class="card">
+        <p id="stage-status" role="status" aria-live="polite" class="sr-only"></p>
         <ul class="stages" id="stages">
           <li class="stage" data-n="1"><span class="dot"></span> Connecting to Kit</li>
           <li class="stage" data-n="2"><span class="dot"></span> Retrieving broadcasts</li>
@@ -114,8 +116,8 @@ export const prerender = true;
 
     <!-- ============ ERROR VIEW ============ -->
     <section id="view-error" class="hidden">
-      <div class="errbox">
-        <h3 id="err-title"></h3>
+      <div class="errbox" role="alert">
+        <h3 id="err-title" tabindex="-1"></h3>
         <p id="err-detail"></p>
         <button class="btn btn--ghost" id="err-retry">Start over</button>
       </div>
@@ -133,7 +135,7 @@ export const prerender = true;
         <button class="btn btn--ghost" id="download-btn">Download .md</button>
         <button class="btn" id="rerun-btn">Re-run</button>
       </div>
-      <article class="report card wrap--wide" id="report"></article>
+      <article class="report card wrap--wide" id="report" tabindex="-1" aria-label="Success Signal Analysis report"></article>
     </section>
 
     <p class="foot">
@@ -144,7 +146,7 @@ export const prerender = true;
   <!-- ============ API KEY HELP MODAL ============ -->
   <div id="help-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
     <div class="modal">
-      <button class="close" id="help-close" aria-label="Close">×</button>
+      <button class="close" id="help-close" aria-label="Close"><span aria-hidden="true">×</span></button>
       <div class="eyebrow">Quick setup · ~30 seconds</div>
       <h2 id="help-title">Get your Kit API key</h2>
       <ol>
@@ -182,25 +184,61 @@ export const prerender = true;
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    // Escapes for HTML text AND attribute context (quotes included). Report
+    // content is derived from the AI model, which is in turn fed untrusted
+    // broadcast content — so every interpolated value must be escaped.
     const esc = (s: unknown) =>
       String(s ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    // Confidence is a closed enum; never trust the model's raw string in a
+    // class attribute. Map to a known-safe token, defaulting to Medium.
+    const confClass = (c: unknown): "High" | "Medium" | "Low" =>
+      c === "High" || c === "Low" ? c : "Medium";
 
     let lastResult: AnalysisResult | null = null;
 
-    // ---- API key help modal ----
+    // ---- API key help modal (focus-managed + trapped) ----
     const helpModal = $("help-modal");
-    const openHelp = () => helpModal.classList.remove("hidden");
-    const closeHelp = () => helpModal.classList.add("hidden");
+    let lastFocused: HTMLElement | null = null;
+    const focusable = () =>
+      Array.from(
+        helpModal.querySelectorAll<HTMLElement>("a[href], button, [tabindex]:not([tabindex='-1'])"),
+      ).filter((el) => !el.hasAttribute("disabled"));
+    const openHelp = () => {
+      lastFocused = document.activeElement as HTMLElement;
+      helpModal.classList.remove("hidden");
+      $("help-close").focus(); // move focus into the dialog
+    };
+    const closeHelp = () => {
+      helpModal.classList.add("hidden");
+      lastFocused?.focus(); // restore focus to the trigger
+    };
     $("help-open").addEventListener("click", openHelp);
     $("help-close").addEventListener("click", closeHelp);
     helpModal.addEventListener("click", (e) => {
       if (e.target === helpModal) closeHelp(); // click backdrop to dismiss
     });
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !helpModal.classList.contains("hidden")) closeHelp();
+      if (helpModal.classList.contains("hidden")) return;
+      if (e.key === "Escape") closeHelp();
+      if (e.key === "Tab") {
+        const els = focusable();
+        if (!els.length) return;
+        const first = els[0];
+        const last = els[els.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     });
 
     // Show the "describe your goal" field only when goal = other.
@@ -209,13 +247,17 @@ export const prerender = true;
       $("goalOther-wrap").style.display = goalSel.value === "other" ? "" : "none";
     });
 
-    // ---- Stage UI ----
+    // ---- Stage UI (announced to screen readers via #stage-status live region) ----
     function setStage(n: number) {
+      let label = "";
       document.querySelectorAll<HTMLElement>(".stage").forEach((el) => {
         const sn = Number(el.dataset.n);
         el.classList.toggle("done", sn < n);
         el.classList.toggle("active", sn === n);
+        if (sn === n) label = el.textContent?.trim() ?? "";
       });
+      const status = document.getElementById("stage-status");
+      if (status) status.textContent = `Step ${n} of 6: ${label}`;
     }
 
     // ---- Submit ----
@@ -229,7 +271,7 @@ export const prerender = true;
         goal: data.goal,
         goalOther: data.goalOther,
         businessModel: data.businessModel,
-        limit: Number(data.limit) || 20,
+        limit: Math.floor(Number(data.limit)) || 20,
         context: {
           accomplishing: data.accomplishing,
           surprised: data.surprised,
@@ -242,14 +284,17 @@ export const prerender = true;
         await streamAnalyze(payload);
       } catch {
         showError({
-          title: "That didn't go through",
-          detail: "The connection dropped before the analysis finished. Your Kit key wasn't stored. Please try again.",
+          title: "The analysis didn't complete",
+          detail:
+            "The connection to the analysis was interrupted before it finished. Your Kit key wasn't stored. Please try again in a moment.",
         });
       }
     });
 
     // ---- SSE over fetch POST ----
+    let sawTerminal = false; // a done or error event arrived
     async function streamAnalyze(payload: unknown) {
+      sawTerminal = false;
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -267,23 +312,48 @@ export const prerender = true;
         buf = chunks.pop() ?? "";
         for (const chunk of chunks) handleEvent(chunk);
       }
+      // The stream ended without a done/error event — surface it rather than
+      // leaving the user stuck on the loader.
+      if (!sawTerminal) {
+        showError({
+          title: "The analysis didn't complete",
+          detail:
+            "The connection to the analysis was interrupted before it finished. Your Kit key wasn't stored. Please try again in a moment.",
+        });
+      }
     }
 
     function handleEvent(chunk: string) {
       const evMatch = chunk.match(/^event: (.+)$/m);
-      const dataMatch = chunk.match(/^data: (.+)$/m);
-      if (!evMatch || !dataMatch) return;
+      if (!evMatch) return;
+      // SSE allows multiple data: lines per event — collect and join them.
+      const dataLines = chunk
+        .split(/\r?\n/)
+        .filter((l) => l.startsWith("data:"))
+        .map((l) => l.slice(5).replace(/^ /, ""));
+      if (!dataLines.length) return;
       const event = evMatch[1].trim();
-      const data = JSON.parse(dataMatch[1]);
+      let data: any;
+      try {
+        data = JSON.parse(dataLines.join("\n"));
+      } catch {
+        return;
+      }
       if (event === "stage") setStage(data.n);
-      else if (event === "error") showError(data);
-      else if (event === "done") renderReport(data as AnalysisResult);
+      else if (event === "error") {
+        sawTerminal = true;
+        showError(data);
+      } else if (event === "done") {
+        sawTerminal = true;
+        renderReport(data as AnalysisResult);
+      }
     }
 
     function showError(data: { title: string; detail: string }) {
       $("err-title").textContent = data.title;
       $("err-detail").textContent = data.detail;
       show("error");
+      ($("err-title") as HTMLElement).focus(); // move SR/keyboard focus to the message
     }
     $("err-retry").addEventListener("click", () => show("form"));
     $("rerun-btn").addEventListener("click", () => show("form"));
@@ -316,7 +386,7 @@ export const prerender = true;
 
       const signals = r.report.signals.map((s) => `
         <div class="signal">
-          <h3>${esc(s.name)} <span class="badge ${esc(s.confidence)}">${esc(s.confidence)}</span></h3>
+          <h3>${esc(s.name)} <span class="badge ${confClass(s.confidence)}">${esc(s.confidence)}</span></h3>
           <div class="meta"><b>Evidence</b></div>
           <ul>${s.evidence.map((e) => `<li>${esc(e)}</li>`).join("")}</ul>
           <p>${esc(s.why_it_matters)}</p>
@@ -370,6 +440,7 @@ export const prerender = true;
         <div class="limits">${list(r.report.data_limitations)}</div>
       `;
       show("results");
+      ($("report") as HTMLElement).focus(); // move focus to the completed report
     }
 
     // ---- Copy / Download ----

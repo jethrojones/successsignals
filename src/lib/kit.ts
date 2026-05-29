@@ -66,7 +66,9 @@ export class KitClient {
 
     const sent = (data.broadcasts ?? [])
       .filter((b) => b.status === "completed" && b.send_at)
-      .sort((a, b) => (b.send_at! > a.send_at! ? 1 : -1))
+      .sort(
+        (a, b) => new Date(b.send_at!).getTime() - new Date(a.send_at!).getTime(),
+      )
       .slice(0, limit);
 
     // Backfill any missing content.

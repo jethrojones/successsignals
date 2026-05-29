@@ -1,0 +1,394 @@
+---
+import Base from "../layouts/Base.astro";
+export const prerender = true;
+---
+
+<Base>
+  <main class="wrap">
+    <!-- ============ FORM VIEW ============ -->
+    <section id="view-form">
+      <div class="hero">
+        <div class="eyebrow">Success Signal Analysis</div>
+        <h1>Find the <span class="hl">signal</span> hiding in your past campaigns.</h1>
+        <p class="sub">
+          Success Signal Analysis reviews your recent Kit broadcasts, compares your
+          winners and losers, and turns your past performance into evidence-backed
+          marketing experiments.
+        </p>
+      </div>
+
+      <form id="analyze-form" class="card" autocomplete="off">
+        <div class="grid-2">
+          <div class="field">
+            <label for="kitApiKey">Kit API key</label>
+            <input type="password" id="kitApiKey" name="kitApiKey" placeholder="kit_…" required />
+            <div class="hint">
+              Kit → Settings → Developer → V4 API key.
+              <button type="button" class="help-link" id="help-open">How do I get one?</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="email">Your email</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required />
+            <div class="hint">We email you a copy of the report.</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Your Kit API key is used only to retrieve campaign data for this
+          analysis and is not stored.</strong> It runs server-side for a single
+          analysis and is discarded immediately after.
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="goal">Primary goal</label>
+            <select id="goal" name="goal">
+              <option value="opens">More opens</option>
+              <option value="clicks" selected>More clicks</option>
+              <option value="sales">More sales</option>
+              <option value="replies">More replies / engagement</option>
+              <option value="unsubscribes">Lower unsubscribes</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="businessModel">Business model</label>
+            <select id="businessModel" name="businessModel">
+              <option>Creator/newsletter</option>
+              <option>Coaching/consulting</option>
+              <option>Course/product sales</option>
+              <option>SaaS</option>
+              <option>Podcast/media</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" id="goalOther-wrap" style="display:none;">
+          <label for="goalOther">Describe your goal</label>
+          <input type="text" id="goalOther" name="goalOther" placeholder="e.g. more event sign-ups" />
+        </div>
+
+        <div class="field" style="max-width:220px;">
+          <label for="limit">Broadcasts to analyze</label>
+          <input type="number" id="limit" name="limit" value="20" min="1" max="50" />
+        </div>
+
+        <div class="field">
+          <label for="accomplishing">Briefly, what are you trying to accomplish with your list?</label>
+          <textarea id="accomplishing" name="accomplishing"></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="surprised">Which recent campaign surprised you, if any?</label>
+            <textarea id="surprised" name="surprised"></textarea>
+          </div>
+          <div class="field">
+            <label for="working">What do you believe is already working?</label>
+            <textarea id="working" name="working"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="submit-btn">Analyze My Campaign Signals</button>
+      </form>
+    </section>
+
+    <!-- ============ LOADING VIEW ============ -->
+    <section id="view-loading" class="hidden">
+      <div class="hero">
+        <div class="eyebrow">Working…</div>
+        <h1 style="font-size:var(--size-h1);">Reading your campaigns.</h1>
+      </div>
+      <div class="card">
+        <ul class="stages" id="stages">
+          <li class="stage" data-n="1"><span class="dot"></span> Connecting to Kit</li>
+          <li class="stage" data-n="2"><span class="dot"></span> Retrieving broadcasts</li>
+          <li class="stage" data-n="3"><span class="dot"></span> Retrieving broadcast details</li>
+          <li class="stage" data-n="4"><span class="dot"></span> Retrieving broadcast stats</li>
+          <li class="stage" data-n="5"><span class="dot"></span> Comparing winners and losers</li>
+          <li class="stage" data-n="6"><span class="dot"></span> Generating Success Signal Analysis</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ ERROR VIEW ============ -->
+    <section id="view-error" class="hidden">
+      <div class="errbox">
+        <h3 id="err-title"></h3>
+        <p id="err-detail"></p>
+        <button class="btn btn--ghost" id="err-retry">Start over</button>
+      </div>
+    </section>
+
+    <!-- ============ RESULTS VIEW ============ -->
+    <section id="view-results" class="hidden">
+      <div class="toolbar">
+        <div>
+          <div class="eyebrow">Success Signal Analysis</div>
+          <div class="sent-note" id="result-meta"></div>
+        </div>
+        <span class="spacer"></span>
+        <button class="btn btn--ghost" id="copy-btn">Copy report</button>
+        <button class="btn btn--ghost" id="download-btn">Download .md</button>
+        <button class="btn" id="rerun-btn">Re-run</button>
+      </div>
+      <article class="report card wrap--wide" id="report"></article>
+    </section>
+
+    <p class="foot">
+      Built by <a href="https://optimizationdoc.com">Optimization Doc</a> · Recommendations are experiments, not guarantees.
+    </p>
+  </main>
+
+  <!-- ============ API KEY HELP MODAL ============ -->
+  <div id="help-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="modal">
+      <button class="close" id="help-close" aria-label="Close">×</button>
+      <div class="eyebrow">Quick setup · ~30 seconds</div>
+      <h2 id="help-title">Get your Kit API key</h2>
+      <ol>
+        <li>
+          Open your Kit
+          <a href="https://app.kit.com/account_settings/developer_settings" target="_blank" rel="noopener">Developer Settings</a>
+          (you'll need to be logged into Kit).
+        </li>
+        <li>Click <strong>Add a new key</strong> and choose the <strong>V4 API key</strong>.</li>
+        <li>Name it <strong>successsignals</strong> so you know what it's for.</li>
+        <li>Copy the key the moment it appears — Kit only shows it once — and paste it into the form.</li>
+      </ol>
+      <div class="modal-note">
+        We use the key for this one analysis and never store it. If it leaves your
+        browser's memory (you refresh or close the tab), you'll just paste it again.
+        When you're done, you can safely delete the key from Kit.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { reportToMarkdown } from "../lib/report-markdown";
+    import type { AnalysisResult } from "../lib/types";
+
+    const $ = (id: string) => document.getElementById(id)!;
+    const views = {
+      form: $("view-form"),
+      loading: $("view-loading"),
+      error: $("view-error"),
+      results: $("view-results"),
+    };
+    function show(view: keyof typeof views) {
+      Object.values(views).forEach((v) => v.classList.add("hidden"));
+      views[view].classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    const esc = (s: unknown) =>
+      String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    let lastResult: AnalysisResult | null = null;
+
+    // ---- API key help modal ----
+    const helpModal = $("help-modal");
+    const openHelp = () => helpModal.classList.remove("hidden");
+    const closeHelp = () => helpModal.classList.add("hidden");
+    $("help-open").addEventListener("click", openHelp);
+    $("help-close").addEventListener("click", closeHelp);
+    helpModal.addEventListener("click", (e) => {
+      if (e.target === helpModal) closeHelp(); // click backdrop to dismiss
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !helpModal.classList.contains("hidden")) closeHelp();
+    });
+
+    // Show the "describe your goal" field only when goal = other.
+    const goalSel = $("goal") as unknown as HTMLSelectElement;
+    goalSel.addEventListener("change", () => {
+      $("goalOther-wrap").style.display = goalSel.value === "other" ? "" : "none";
+    });
+
+    // ---- Stage UI ----
+    function setStage(n: number) {
+      document.querySelectorAll<HTMLElement>(".stage").forEach((el) => {
+        const sn = Number(el.dataset.n);
+        el.classList.toggle("done", sn < n);
+        el.classList.toggle("active", sn === n);
+      });
+    }
+
+    // ---- Submit ----
+    $("analyze-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target as HTMLFormElement;
+      const data = Object.fromEntries(new FormData(f).entries()) as Record<string, string>;
+      const payload = {
+        kitApiKey: data.kitApiKey,
+        email: data.email,
+        goal: data.goal,
+        goalOther: data.goalOther,
+        businessModel: data.businessModel,
+        limit: Number(data.limit) || 20,
+        context: {
+          accomplishing: data.accomplishing,
+          surprised: data.surprised,
+          working: data.working,
+        },
+      };
+      show("loading");
+      setStage(1);
+      try {
+        await streamAnalyze(payload);
+      } catch {
+        showError({
+          title: "That didn't go through",
+          detail: "The connection dropped before the analysis finished. Your Kit key wasn't stored. Please try again.",
+        });
+      }
+    });
+
+    // ---- SSE over fetch POST ----
+    async function streamAnalyze(payload: unknown) {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.body) throw new Error("no stream");
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const chunks = buf.split("\n\n");
+        buf = chunks.pop() ?? "";
+        for (const chunk of chunks) handleEvent(chunk);
+      }
+    }
+
+    function handleEvent(chunk: string) {
+      const evMatch = chunk.match(/^event: (.+)$/m);
+      const dataMatch = chunk.match(/^data: (.+)$/m);
+      if (!evMatch || !dataMatch) return;
+      const event = evMatch[1].trim();
+      const data = JSON.parse(dataMatch[1]);
+      if (event === "stage") setStage(data.n);
+      else if (event === "error") showError(data);
+      else if (event === "done") renderReport(data as AnalysisResult);
+    }
+
+    function showError(data: { title: string; detail: string }) {
+      $("err-title").textContent = data.title;
+      $("err-detail").textContent = data.detail;
+      show("error");
+    }
+    $("err-retry").addEventListener("click", () => show("form"));
+    $("rerun-btn").addEventListener("click", () => show("form"));
+
+    // ---- Render ----
+    function pct(n: number) { return `${n}%`; }
+
+    function renderReport(r: AnalysisResult) {
+      lastResult = r;
+      $("result-meta").textContent = `${r.account.name} · ${r.campaigns.length} campaigns · scored by ${r.scoreMethod}`;
+
+      const topIds = new Set(r.top.map((c) => c.id));
+      const bottomIds = new Set(r.bottom.map((c) => c.id));
+
+      const rows = r.campaigns.map((c) => {
+        const cls = topIds.has(c.id) ? "win" : bottomIds.has(c.id) ? "lose" : "";
+        const date = c.sendAt ? c.sendAt.slice(0, 10) : "—";
+        const rev = r.revenueAvailable ? `<td class="num">${c.revenue != null ? "$" + c.revenue : "—"}</td>` : "";
+        return `<tr class="${cls}">
+          <td class="subj">${esc(c.subject)}</td>
+          <td class="num">${date}</td>
+          <td class="num">${c.stats.recipients}</td>
+          <td class="num">${pct(c.stats.open_rate)}</td>
+          <td class="num">${pct(c.stats.click_rate)}</td>
+          <td class="num">${c.stats.unsubscribes}</td>
+          <td class="num"><b>${c.score}</b></td>${rev}
+        </tr>`;
+      }).join("");
+      const revHead = r.revenueAvailable ? "<th>Revenue</th>" : "";
+
+      const signals = r.report.signals.map((s) => `
+        <div class="signal">
+          <h3>${esc(s.name)} <span class="badge ${esc(s.confidence)}">${esc(s.confidence)}</span></h3>
+          <div class="meta"><b>Evidence</b></div>
+          <ul>${s.evidence.map((e) => `<li>${esc(e)}</li>`).join("")}</ul>
+          <p>${esc(s.why_it_matters)}</p>
+          <p class="principle">${esc(s.related_principle)}</p>
+          <div class="exp"><b>Experiment:</b> ${esc(s.recommended_experiment)}</div>
+          <div class="meta">Why ${esc(s.confidence)} confidence: ${esc(s.confidence_reason)}</div>
+        </div>`).join("");
+
+      const experiments = r.report.experiments.map((x, i) => `
+        <div class="exp-card">
+          <div class="t">${i + 1}. ${esc(x.experiment)}</div>
+          <div class="row"><b>Why:</b> ${esc(x.why)}</div>
+          <div class="row"><b>How to measure:</b> ${esc(x.how_to_measure)}</div>
+          <div class="row"><b>Success looks like:</b> ${esc(x.success_looks_like)}</div>
+        </div>`).join("");
+
+      const list = (arr: string[]) => `<ul>${arr.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>`;
+
+      $("report").innerHTML = `
+        <h1 style="font-family:var(--font-display);text-transform:uppercase;font-size:var(--size-h1);margin:0 0 var(--space-6);">Success Signal Analysis</h1>
+
+        <h2>Executive Summary</h2>
+        ${list(r.report.executive_summary)}
+
+        <h2>Your Success Goal</h2>
+        <p>${esc(r.report.success_goal)}</p>
+
+        <h2>Campaigns Analyzed</h2>
+        <div class="tbl-scroll"><table class="camps">
+          <thead><tr><th>Subject</th><th>Sent</th><th>Recipients</th><th>Open</th><th>Click</th><th>Unsubs</th><th>Score</th>${revHead}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+
+        <div class="cols">
+          <div><h2>Top Performers</h2>${list(r.top.map((c) => `${c.subject} — score ${c.score}`))}</div>
+          <div><h2>Bottom Performers</h2>${list(r.bottom.map((c) => `${c.subject} — score ${c.score}`))}</div>
+        </div>
+
+        <h2>Success Signals Detected</h2>
+        ${signals}
+
+        <div class="cols">
+          <div><h2>What To Repeat</h2>${list(r.report.what_to_repeat)}</div>
+          <div><h2>What To Stop Doing</h2>${list(r.report.what_to_stop)}</div>
+        </div>
+
+        <h2>Next 30-Day Experiment Plan</h2>
+        ${experiments}
+
+        <h2>Data Limitations</h2>
+        <div class="limits">${list(r.report.data_limitations)}</div>
+      `;
+      show("results");
+    }
+
+    // ---- Copy / Download ----
+    $("copy-btn").addEventListener("click", async () => {
+      if (!lastResult) return;
+      await navigator.clipboard.writeText(reportToMarkdown(lastResult));
+      const b = $("copy-btn");
+      b.textContent = "Copied ✓";
+      setTimeout(() => (b.textContent = "Copy report"), 1600);
+    });
+    $("download-btn").addEventListener("click", () => {
+      if (!lastResult) return;
+      const blob = new Blob([reportToMarkdown(lastResult)], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "success-signal-analysis.md";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</Base>

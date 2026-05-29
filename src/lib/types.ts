@@ -94,3 +94,48 @@ export interface Account {
   name: string;
   plan_type: string;
 }
+
+export type Confidence = "High" | "Medium" | "Low";
+
+export interface ReportSignal {
+  name: string;
+  /** Specific campaign evidence — must cite the actual data. */
+  evidence: string[];
+  why_it_matters: string;
+  related_principle: string;
+  recommended_experiment: string;
+  confidence: Confidence;
+  confidence_reason: string;
+}
+
+export interface Experiment {
+  experiment: string;
+  why: string;
+  how_to_measure: string;
+  success_looks_like: string;
+}
+
+/** The narrative report from the second AI call (numbers come from our data). */
+export interface ReportData {
+  executive_summary: string[];
+  success_goal: string;
+  signals: ReportSignal[];
+  what_to_repeat: string[];
+  what_to_stop: string[];
+  experiments: Experiment[];
+  data_limitations: string[];
+}
+
+/** Everything the results page needs. */
+export interface AnalysisResult {
+  account: { name: string };
+  goal: Goal;
+  scoreMethod: string;
+  campaigns: Campaign[];
+  features: CampaignFeatures[];
+  top: Campaign[];
+  bottom: Campaign[];
+  report: ReportData;
+  lowConfidence: boolean;
+  revenueAvailable: boolean;
+}

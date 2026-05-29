@@ -20,3 +20,9 @@ dist/
 # os / editor
 .DS_Store
 *.log
+
+# vendored skill sources — kept locally to inform the analysis, but NOT
+# republished here. Their distilled principles live in src/lib/knowledge.ts.
+/email-newsletter/
+/growth-lead/
+/storybrand-messaging/

@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
+    "postbuild": "printf '_worker.js\\n_routes.json\\n.assetsignore\\n' > dist/.assetsignore",
     "preview": "astro preview",
-    "deploy": "astro build && wrangler deploy",
+    "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {

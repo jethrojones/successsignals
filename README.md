@@ -13,6 +13,7 @@ Built with Astro + Cloudflare Workers. Lives at
 **Project artifacts**
 
 - **How to use it:** [docs/tutorial.md](docs/tutorial.md) — a 7-step, screenshot-based walkthrough.
+- **Ideation conversation (ChatGPT):** [scoping → spec](https://gist.github.com/jethrojones/8fa8b81f48d96923bd903e6252711000) — the planning chat that narrowed scope, chose the hybrid knowledge approach, and produced the build spec.
 - **Planning doc / build spec:** [overview](https://gist.github.com/jethrojones/7428a8dff16522db715e062875a20ffe) — the original spec the app was built from.
 - **Prompt 1 — feature extraction:** [gist](https://gist.github.com/jethrojones/b6c0d6bbbb68da55eab0b782e1297cbf) — classifies each broadcast's content into structured features.
 - **Prompt 2 — evidence-first report:** [gist](https://gist.github.com/jethrojones/562a687edfd48b80f92ded23a536ea9e) — compares winners vs. losers and writes the report.

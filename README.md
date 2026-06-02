@@ -10,6 +10,9 @@ experiments.
 Built with Astro + Cloudflare Workers. Lives at
 [successsignals.optimizationdoc.com](https://successsignals.optimizationdoc.com).
 
+- **How to use it:** [docs/tutorial.md](docs/tutorial.md) — a 7-step, screenshot-based walkthrough.
+- **How it was built:** [build transcript](https://gist.github.com/jethrojones/282f8417fbdf45c359c6ebcf8b867223) — the Claude Code session that designed, built, QA'd, and deployed it (secrets redacted).
+
 ---
 
 ## How it works

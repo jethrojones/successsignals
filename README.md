@@ -10,7 +10,12 @@ experiments.
 Built with Astro + Cloudflare Workers. Lives at
 [successsignals.optimizationdoc.com](https://successsignals.optimizationdoc.com).
 
+**Project artifacts**
+
 - **How to use it:** [docs/tutorial.md](docs/tutorial.md) — a 7-step, screenshot-based walkthrough.
+- **Planning doc / build spec:** [overview](https://gist.github.com/jethrojones/7428a8dff16522db715e062875a20ffe) — the original spec the app was built from.
+- **Prompt 1 — feature extraction:** [gist](https://gist.github.com/jethrojones/b6c0d6bbbb68da55eab0b782e1297cbf) — classifies each broadcast's content into structured features.
+- **Prompt 2 — evidence-first report:** [gist](https://gist.github.com/jethrojones/562a687edfd48b80f92ded23a536ea9e) — compares winners vs. losers and writes the report.
 - **How it was built:** [build transcript](https://gist.github.com/jethrojones/282f8417fbdf45c359c6ebcf8b867223) — the Claude Code session that designed, built, QA'd, and deployed it (secrets redacted).
 
 ---
